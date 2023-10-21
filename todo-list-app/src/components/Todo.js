@@ -7,7 +7,11 @@ import IconButton from "@mui/material/IconButton";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
-export default function Todo() {
+export default function Todo({ todo, todofunction }) {
+  function onCHangeofCLick() {
+    todofunction(todo.id);
+  }
+
   return (
     <>
       <Card
@@ -50,21 +54,22 @@ export default function Todo() {
                   className="iconBotton"
                   aria-label="delete"
                   style={{
-                    color: "#8bc34a",
-                    backgroundColor: "white",
+                    color: todo.isCompleted ? "#8bc34a" : "white",
+                    backgroundColor: todo.isCompleted ? "white" : "#8bc34a",
                     border: "3px solid #8bc34a",
                   }}
+                  onClick={onCHangeofCLick}
                 >
                   <CheckIcon />
                 </IconButton>
               </Typography>
             </Grid>
             <Grid xs={8}>
-              <Typography style={{ textAlign: "end" }} variant="h4">
-                المهمة الاولة
+              <Typography style={{ textAlign: "end" }} variant="h5">
+                {todo.tittle}
               </Typography>
               <Typography style={{ textAlign: "end" }} variant="h6">
-                تفاصيل خاص بالمهمة الاولة
+                {todo.conformation}
               </Typography>
             </Grid>
           </Grid>
