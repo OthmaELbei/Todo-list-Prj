@@ -17,50 +17,47 @@ import Todo from "./Todo";
 import Grid from "@mui/material/Unstable_Grid2";
 import TextField from "@mui/material/TextField";
 
-//peplue
 import { v4 as uuidv4 } from "uuid";
+//peplue
+import { TodosContext } from "../contexts/todosContext";
 
-import { useState } from "react";
+import { useContext } from "react";
 
-const initialtodos = [
-  {
-    id: uuidv4(),
-    tittle: "المهمة الاولة",
-    conformation: "dfghjklmùpoklmiytg",
-    isCompleted: false,
-  },
-  {
-    id: uuidv4(),
-    tittle: "المهمة الاولة",
-    conformation: "dfghjklmùpoklmiytg",
-    isCompleted: false,
-  },
-  {
-    id: uuidv4(),
-    tittle: "المهمة الاولة",
-    conformation: "dfghjklmùpoklmiytg",
-    isCompleted: false,
-  },
-];
+import { useState, useEffect } from "react";
 
 export default function TodoList() {
-  const [todos, setTodos] = useState(initialtodos);
+  const { todos, setTodos } = useContext(TodosContext);
   const [tittleinput, setTittleinput] = useState("");
 
-  function handlecheckClick(todoId) {
-    const updateTodos = todos.map((t) => {
-      if (t.id == todoId) {
-        t.isCompleted = !t.isCompleted;
-      }
-      return t;
-    });
-    setTodos(updateTodos);
-    console.log(todos);
+  const [displayedTodosType, setDisplayedTodosType] = useState("all");
+
+  const completedTodos = todos.filter((t) => {
+    return t.isCompleted;
+  });
+  const notCompletedTodos = todos.filter((t) => {
+    return !t.isCompleted;
+  });
+
+  let todosTobeRenderen = todos;
+  if (displayedTodosType == "completed") {
+    todosTobeRenderen = completedTodos;
+  } else if (displayedTodosType == "non-completed") {
+    todosTobeRenderen = notCompletedTodos;
+  } else {
+    todosTobeRenderen = todos;
   }
 
-  const todosJsx = todos.map((t) => {
-    return <Todo key={t.id} todo={t} todofunction={handlecheckClick} />;
+  const todosJsx = todosTobeRenderen.map((t) => {
+    return <Todo key={t.id} todo={t} />;
   });
+  useEffect(() => {
+    const storageTodos = JSON.parse(localStorage.getItem("todos")) ?? [];
+    setTodos(storageTodos);
+  }, []);
+
+  function changdesplayeTape(e) {
+    setDisplayedTodosType(e.target.value);
+  }
 
   function handleAddClick() {
     // alert("halle");
@@ -69,13 +66,18 @@ export default function TodoList() {
       tittle: tittleinput,
       conformation: "",
     };
-    setTodos([...todos, newTodos]);
+    const updateTodos = [...todos, newTodos];
+    setTodos(updateTodos);
+    localStorage.setItem("todos", JSON.stringify(updateTodos));
     setTittleinput("");
   }
 
   return (
     <Container maxWidth="sm">
-      <Card sx={{ minWidth: 275 }} style={{ padding: "10px" }}>
+      <Card
+        sx={{ minWidth: 275 }}
+        style={{ padding: "10px", overflow: "scroll", maxHeight: "80vh" }}
+      >
         <CardContent>
           <Typography variant="h2" style={{ fontWeight: "bold" }}>
             مهامي
@@ -85,19 +87,20 @@ export default function TodoList() {
           {/* start tgolle bottom */}
           <ToggleButtonGroup
             style={{ direction: "ltr", marginTop: "30px" }}
-            //   value={alignment}
+            value={displayedTodosType}
             exclusive
-            //   onChange={handleAlignment}
+            onChange={changdesplayeTape}
             aria-label="text alignment"
+            color="primary"
           >
-            <ToggleButton value="right" aria-label="right aligned">
+            <ToggleButton value="non-completed" aria-label="right aligned">
               الغير المنجز
             </ToggleButton>
-            <ToggleButton value="center" aria-label="centered">
+            <ToggleButton value="completed" aria-label="centered">
               المنجز
             </ToggleButton>
 
-            <ToggleButton value="left" aria-label="left aligned">
+            <ToggleButton value="all" aria-label="left aligned">
               الكل
             </ToggleButton>
           </ToggleButtonGroup>
@@ -122,6 +125,7 @@ export default function TodoList() {
               onClick={() => {
                 handleAddClick();
               }}
+              disabled={tittleinput.length == 0}
             >
               اضافة
             </Button>
